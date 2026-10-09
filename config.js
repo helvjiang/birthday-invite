@@ -3,9 +3,10 @@
  * ========================================================================= */
 window.CONFIG = {
 
-  /* 演示模式：true 时数据存在浏览器本地，无需任何账号，双击 index.html 即可预览效果。
-     部署上线时改成 false，并填下面的 SUPABASE_URL / SUPABASE_ANON_KEY。 */
-  DEMO: false,
+  /* 演示模式：默认按域名自动判断——
+     本地预览(localhost / 127.0.0.1)自动走演示模式，数据存浏览器、不连真实库，方便您随便测不污染；
+     线上(github.io 等)自动走真实库。如需强制，可改成固定 true / false。 */
+  DEMO: (location.hostname === "localhost" || location.hostname === "127.0.0.1"),
 
   /* Supabase 项目地址与匿名密钥（在 supabase.com → 项目设置 → API 里复制）。
      演示模式下这两项被忽略。 */
