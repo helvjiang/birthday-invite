@@ -281,6 +281,17 @@ window.Store = (function () {
     return { guests: gg, seats: ss, gifts: gi };
   }
 
+  /* ---------------------- 全量受邀名单（后台算"未入座"用） ---------------------- */
+  async function getInvitationsAll() {
+    if (C.DEMO) return demoInv();
+    // 线上优先读随站点部署的 invitations.js（改名单刷新即生效），兜底 Supabase invitations 表
+    if (Array.isArray(window.INVITATIONS) && window.INVITATIONS.length) return window.INVITATIONS;
+    try {
+      const rows = await rest("/invitations?select=name&order=name.asc");
+      return rows.map(r => ({ name: r.name }));
+    } catch (e) { return []; }
+  }
+
   /* ---------------------- 图片压缩（demo 用，避免 localStorage 爆满） ---------------------- */
   function compressImage(file, maxDim) {
     return new Promise((resolve, reject) => {
@@ -304,5 +315,5 @@ window.Store = (function () {
     });
   }
 
-  return { init, getInvitation, respond, getMyStatus, getSeats, getMySeat, uploadPhoto, uploadVoice, occupySeat, releaseSeat, updateSeat, addGift, getGifts, adminSummary };
+  return { init, getInvitation, getInvitationsAll, respond, getMyStatus, getSeats, getMySeat, uploadPhoto, uploadVoice, occupySeat, releaseSeat, updateSeat, addGift, getGifts, adminSummary };
 })();

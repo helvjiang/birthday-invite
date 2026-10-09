@@ -5,7 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>主人后台 · 生辰邀函</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .admin-photo { cursor: zoom-in; transition: transform .15s; }
+    .admin-photo:hover { transform: scale(1.04); }
+    #lightbox { position: fixed; inset: 0; z-index: 9999; display: none;
+      align-items: center; justify-content: center; background: rgba(20,14,8,.9);
+      cursor: zoom-out; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px;
+      box-shadow: 0 0 40px rgba(0,0,0,.6); border: 1px solid rgba(201,168,106,.5); }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="invitations.js"></script>
 </head>
 <body>
   <div class="app">
@@ -23,6 +34,10 @@
     <div id="dash" style="display:none">
       <div class="card" id="overview"></div>
       <div class="card">
+        <div class="roster-title">未入座名单</div>
+        <div id="pending-detail"></div>
+      </div>
+      <div class="card">
         <div class="roster-title">席位明细</div>
         <div id="seat-detail"></div>
       </div>
@@ -32,6 +47,8 @@
       </div>
     </div>
   </div>
+
+  <div id="lightbox"><img id="lightbox-img" alt="查看大图" /></div>
 
   <script src="config.js"></script>
   <script src="store.js"></script>
@@ -47,10 +64,15 @@
       document.getElementById("dash").style.display = "block";
       await S.init();
       const d = await S.adminSummary();
-      const inv = await (C.DEMO ? Promise.resolve(null) : S.getInvitationsAll ? S.getInvitationsAll() : Promise.resolve(null));
+      const inv = await S.getInvitationsAll();   // 全量受邀名单（含 74 人）
+      const invNames = (inv || []).map(x => x.name);
       const accepted = d.guests.filter(g => g.status === "accepted");
       const rejected = d.guests.filter(g => g.status === "rejected");
       const taken = d.seats.filter(s => s.occupied_by);
+      const seatedNames = new Set(taken.map(s => s.occupied_by));
+      const guestStatus = {};
+      d.guests.forEach(g => { guestStatus[g.name] = g.status; });
+      const notSeated = invNames.filter(nm => !seatedNames.has(nm));   // 名单里有、但 seats 里没落席的人
       const giftTotal = d.gifts.length;
       document.getElementById("overview").innerHTML =
         `<div class="roster-title">概览</div>` +
@@ -58,6 +80,7 @@
         `<div class="roster-item">接受 ${accepted.length}</div>` +
         `<div class="roster-item">婉拒 ${rejected.length}</div>` +
         `<div class="roster-item">落席 ${taken.length}/${C.SEAT_COUNT}</div>` +
+        `<div class="roster-item">未入座 ${notSeated.length} 人</div>` +
         `<div class="roster-item">赠礼 ${giftTotal} 件</div>`;
 
       document.getElementById("seat-detail").innerHTML = taken.length ? taken
@@ -65,7 +88,8 @@
           `<div class="wall-card" style="margin:8px 0;padding:8px;border:1px solid rgba(201,168,106,.4);border-radius:10px">
             <div><b>第${s.seat_id}席</b> · ${esc(s.occupied_by)}
               ${s.photo_visibility==="private" ? ' <span style="color:var(--red)">［私密照片］</span>' : ""}</div>
-            ${s.photo_url ? `<img src="${s.photo_url}" style="max-width:120px;max-height:120px;border-radius:8px;margin:6px 0"/>` : ""}
+            ${s.photo_url ? `<img class="admin-photo" src="${s.photo_url}" style="max-width:120px;max-height:120px;border-radius:8px;margin:6px 0"/>` : ""}
+            ${s.voice_url ? `<div style="margin:6px 0"><audio controls preload="none" src="${esc(s.voice_url)}" style="width:100%;max-width:320px"></audio></div>` : ""}
             <div style="font-size:14px;color:#5a5040">${esc(s.message)||"（无题字）"}</div>
           </div>`).join("") : '<p class="hint">尚无落席</p>';
 
@@ -82,7 +106,28 @@
           <div class="wall-name">${esc(nm)} 赠</div>
           <div class="wall-items">${Object.values(byName[nm]).map(it=>`<span class="wall-item">${it.emoji}×${it.n}</span>`).join("")}</div>
         </div>`).join("") : '<p class="hint">尚无赠礼</p>';
+
+      // 未入座名单：标注每人当前状态（已接受待入座 / 已婉拒 / 未回应）
+      const tagOf = (nm) => {
+        const st = guestStatus[nm];
+        if (st === "rejected") return '<span style="float:right;font-size:13px;color:var(--red)">已婉拒</span>';
+        if (st === "accepted") return '<span style="float:right;font-size:13px;color:#2e8b57">已接受·待入座</span>';
+        return '<span style="float:right;font-size:13px;color:#9a8a6a">未回应</span>';
+      };
+      document.getElementById("pending-detail").innerHTML = notSeated.length
+        ? notSeated.map(nm => `<div class="roster-item">${esc(nm)} ${tagOf(nm)}</div>`).join("")
+        : '<p class="hint">全员皆已入座 🎉</p>';
     };
+
+    // 点击席位照片看大图
+    const lb = document.getElementById("lightbox");
+    const lbImg = document.getElementById("lightbox-img");
+    document.getElementById("seat-detail").addEventListener("click", (e) => {
+      const img = e.target.closest(".admin-photo");
+      if (img) { lbImg.src = img.getAttribute("src"); lb.classList.add("open"); }
+    });
+    lb.addEventListener("click", () => lb.classList.remove("open"));
+
   </script>
 </body>
 </html>
