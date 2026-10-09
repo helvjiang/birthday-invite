@@ -80,7 +80,11 @@
   }
   function bindHome() {
     const go = () => doEnter();
-    $("#name-go").onclick = go;
+    const btn = $("#name-go");
+    btn.onclick = go;
+    // 移动端：输入完名字点「入」时，系统会优先把触摸当成「收起软键盘」而吞掉 click，
+    // 故在 touchstart 阶段就触发提交，并 preventDefault 阻止合成 click 重复触发。
+    btn.ontouchstart = (e) => { e.preventDefault(); go(); };
     $("#name-input").onkeydown = (e) => { if (e.key === "Enter") go(); };
   }
   function switchName() {
@@ -90,7 +94,7 @@
   }
   async function doEnter() {
     const name = $("#name-input").value.trim();
-    if (!name) return;
+    if (!name) { toast("请先输入你的名字"); return; }
     const inv = await S.getInvitation(name);
     const res = $("#inv-result");
     if (!inv) {
