@@ -122,7 +122,7 @@ body {
 
 /* 背景音乐开关 */
 #bgm-toggle {
-  position: fixed; top: 14px; right: 14px; z-index: 46; cursor: pointer;
+  position: fixed; top: 14px; right: 14px; z-index: 10000; cursor: pointer;
   width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--gold);
   background: rgba(255,255,255,0.6); color: var(--red); font-size: 16px; font-family: var(--font);
 }
@@ -187,3 +187,79 @@ body.wx #bgm-toggle { top: 52px; }
   font-family: var(--font); font-size: 14px; cursor: pointer;
 }
 .view-edit:hover { opacity: 0.9; }
+
+/* ============ 开屏序章 ============ */
+#intro {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(circle at 50% 38%, #2c1d12 0%, #140d08 70%, #0c0704 100%);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; transition: opacity 0.95s ease;
+}
+#intro.hide { opacity: 0; pointer-events: none; }
+
+.intro-stage {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px; padding: 24px; text-align: center;
+  opacity: 0; transform: scale(1.06); filter: blur(9px);
+  transition: opacity 0.95s ease, transform 0.95s ease, filter 0.95s ease;
+  pointer-events: none;
+}
+.intro-stage.active { opacity: 1; transform: scale(1); filter: blur(0); pointer-events: auto; }
+
+.intro-text {
+  color: #f3e9d6; font-size: 21px; letter-spacing: 0.07em; line-height: 1.9;
+  font-family: var(--font);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6); max-width: 90%;
+}
+.intro-gold {
+  color: #e8c66a; font-weight: 700; font-size: 30px; margin: 0 5px;
+  text-shadow: 0 0 14px rgba(232,198,106,0.65);
+}
+.intro-img {
+  max-width: 60%; max-height: 40vh; border-radius: 10px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.55);
+  border: 2px solid rgba(232,198,106,0.5);
+}
+.intro-tip {
+  position: absolute; bottom: 64px; left: 0; right: 0; text-align: center;
+  color: rgba(243,233,214,0.55); font-size: 13px; letter-spacing: 0.25em;
+  animation: breathe 2.2s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+
+/* 进度条 */
+.intro-bar {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 30px;
+  width: 62%; max-width: 360px; height: 4px; border-radius: 4px;
+  background: rgba(255,255,255,0.12); overflow: hidden; z-index: 3;
+}
+.intro-bar-fill {
+  height: 100%; width: 0%; border-radius: 4px;
+  background: linear-gradient(90deg, #e8c66a, #d4a017);
+  transition: width 0.25s linear;
+}
+.intro-loading {
+  position: absolute; bottom: 56px; left: 0; right: 0; text-align: center;
+  color: #e8c66a; font-size: 14px; letter-spacing: 0.22em; z-index: 3;
+}
+
+/* 拆信封动画 */
+.envelope { position: absolute; inset: 0; z-index: 1; }
+.env-half {
+  position: absolute; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, #9c2b22, #7c1f18);
+  transition: transform 1.25s cubic-bezier(0.7,0,0.3,1);
+  box-shadow: inset 0 0 70px rgba(0,0,0,0.45);
+}
+.env-top { top: 0; }
+.env-bottom { bottom: 0; background: linear-gradient(0deg, #9c2b22, #7c1f18); }
+.env-seam {
+  position: absolute; top: calc(50% - 3px); left: 0; right: 0; height: 6px; z-index: 2;
+  background: linear-gradient(90deg, transparent, #e8c66a 12%, #f6e3a0 50%, #e8c66a 88%, transparent);
+  box-shadow: 0 0 18px rgba(232,198,106,0.85);
+  transition: opacity 0.6s ease;
+}
+.envelope.open .env-top { transform: translateY(-100%); }
+.envelope.open .env-bottom { transform: translateY(100%); }
+.envelope.open .env-seam { opacity: 0; }

@@ -409,8 +409,66 @@
       r.readAsDataURL(f);
     };
     setupVoiceRecorder();
-    showView("home");
-    await renderHome();
+    await runIntro();
+  }
+
+  /* ---------------- 开屏序章（加载门闸） ---------------- */
+  function runIntro() {
+    return new Promise((resolve) => {
+      const intro = $("#intro");
+      if (!intro) { (async () => { try { await renderHome(); } catch (e) {} showView("home"); resolve(); })(); return; }
+      const stages = [$("#intro-stage1"), $("#intro-stage2"), $("#intro-stage3")];
+      const fill = $("#intro-bar-fill");
+      const loading = $("#intro-loading");
+      const envelope = $(".envelope");
+      let idx = 0, revealing = false, dataDone = false, progress = 0;
+      const t0 = Date.now(), MIN_MS = 15000;   // 故意卡约 15s，避免半载就进、点了没反应
+      stages[0].classList.add("active");
+
+      function tick() {
+        const elapsed = Date.now() - t0;
+        let p = Math.min(100, (elapsed / MIN_MS) * 100);
+        if (!dataDone) p = Math.min(p, 95);
+        progress = p;
+        if (fill) fill.style.width = p + "%";
+        if (progress < 100 || !dataDone) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      function waitReady() {
+        return new Promise((res) => {
+          const chk = () => { if (progress >= 100 && dataDone) res(); else setTimeout(chk, 80); };
+          chk();
+        });
+      }
+
+      async function tryReveal() {
+        if (revealing) return;
+        revealing = true;
+        loading.style.display = "block";
+        try { await renderHome(); } catch (e) { /* 渲染异常也放行，不卡死用户 */ }
+        dataDone = true;
+        showView("home");
+        await waitReady();                 // 至少卡满 15s（数据更慢则等数据）
+        envelope.classList.add("open");    // 信封上下拉开，露出主界面
+        setTimeout(() => {
+          intro.classList.add("hide");     // 水墨散开般淡出
+          setTimeout(() => { intro.style.display = "none"; resolve(); }, 980);
+        }, 1050);
+      }
+
+      function advance() {
+        if (revealing) return;
+        idx++;
+        if (idx < stages.length) {
+          stages[idx - 1].classList.remove("active");
+          stages[idx].classList.add("active");
+        } else {
+          tryReveal();
+        }
+      }
+      intro.onclick = advance;
+    });
   }
 
   /* ---------------- 语音祝福录音 ---------------- */
