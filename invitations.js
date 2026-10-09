@@ -359,5 +359,10 @@ window.INVITATIONS = [
     "name": "马湘淼",
     "invitation_text": "<h2 class=\"inv-title\">致 马湘淼</h2>\n<p>负琴奏潇湘水云，见你如酒水满、竹林间，高山流水遇美仙。小跳蛛来赴宴吧~</p>\n",
     "theme": ""
+  },
+  {
+    "name": "李林馨",
+    "invitation_text": "<h2 class=\"inv-title\">致 李林馨</h2>\n<p>小公主殿下，本王子的生日要到了，邀请你来我的云上王国赴宴！</p>\n",
+    "theme": ""
   }
 ];
