@@ -119,9 +119,17 @@ window.Store = (function () {
     return (Array.isArray(window.INVITATIONS) && window.INVITATIONS.length) ? window.INVITATIONS : SEED_INV;
   }
   async function getInvitation(name) {
-    if (C.DEMO) { const inv = demoInv(); return inv.find(x => x.name === name) || null; }
-    const rows = await rest(`/invitations?select=name,invitation_text,theme&name=eq.${encodeURIComponent(name)}`);
-    return rows[0] || null;
+    // 优先读随站点部署的 invitations.js（由 xlsx 生成，改名单刷新即生效，无需灌库）。
+    // 线上(DEMO:false)同样先读它，Supabase invitations 表仅作为兜底补充。
+    const inv = demoInv();
+    const hit = inv.find(x => x.name === name);
+    if (hit) return hit;
+    if (C.DEMO) return null;
+    try {
+      const rows = await rest(`/invitations?select=name,invitation_text,theme&name=eq.${encodeURIComponent(name)}`);
+      if (rows[0]) return rows[0];
+    } catch (e) { /* 忽略，交给下面的兜底 */ }
+    return null;
   }
 
   async function respond(name, status) {
