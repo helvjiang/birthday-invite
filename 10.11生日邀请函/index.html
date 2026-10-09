@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>十月十一 · 陈山石生辰邀函</title>
+  <meta property="og:title" content="十月十一 · 陈山石生辰邀函" />
+  <meta property="og:description" content="生辰邀函 · 点此启封你的专属邀请函，选座、赠礼、题字，心形之中留你一笔。" />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="wx-tip" class="wx-tip">微信内若上传图片或播放音乐异常，请点右上角 ⋯ 选「在浏览器打开」体验更佳</div>
+  <button id="bgm-toggle">♪ 默</button>
+  <audio id="bgm"></audio>
+
+  <div class="app">
+    <!-- 首页 -->
+    <section id="view-home">
+      <div class="card" id="home-card"></div>
+    </section>
+
+    <!-- 选座 -->
+    <section id="view-seats" style="display:none">
+      <div class="card">
+        <div id="seat-tip" class="seat-tip"></div>
+        <div class="seat-canvas" id="seat-canvas"></div>
+        <div id="seat-roster"></div>
+      </div>
+    </section>
+
+    <!-- 赠礼 -->
+    <section id="view-gifts" style="display:none">
+      <div class="card">
+        <div class="gift-sponsor">本栏目由花卉园丁倾情赞助~</div>
+        <div class="gift-grid" id="gift-grid"></div>
+        <div class="roster-title">贡献榜</div>
+        <div id="gift-wall"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 底部三导航 -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" data-view="home">首 页</button>
+      <button class="nav-btn" data-view="seats">选 座</button>
+      <button class="nav-btn" data-view="gifts">赠 礼</button>
+    </div>
+  </nav>
+
+  <!-- 选座弹窗 -->
+  <div class="modal" id="seat-modal">
+    <div class="modal-box">
+      <h3><span id="modal-action">落席</span> · 第 <span id="modal-seat-id"></span> 席</h3>
+      <label>上传照片</label>
+      <input type="file" id="seat-file" accept="image/*" />
+      <img id="seat-preview" alt="预览" />
+      <label class="clear-photo" id="seat-clear-wrap" style="display:none"><input type="checkbox" id="seat-clear" /> 清除原有照片</label>
+      <label>题字祝福</label>
+      <textarea id="seat-msg" placeholder="写点什么吧，长短随意……"></textarea>
+      <label>语音祝福</label>
+      <div class="voice-box">
+        <button type="button" id="rec-btn" class="rec-btn">● 录音</button>
+        <span id="rec-status" class="rec-status"></span>
+        <input type="file" id="voice-file" accept="audio/*" />
+        <audio id="voice-preview" controls preload="none" style="display:none"></audio>
+        <label class="clear-photo" id="voice-clear-wrap" style="display:none"><input type="checkbox" id="voice-clear" /> 清除原语音</label>
+      </div>
+      <p class="hint" id="seat-move-note" style="display:none">换座后，原座位将自动腾空。</p>
+      <div class="vis-row">
+        <label><input type="radio" name="vis" id="vis-public" checked /> 公开（所有人可见）</label>
+        <label><input type="radio" name="vis" id="vis-private" /> 私密（仅我俩可见）</label>
+      </div>
+      <div class="modal-actions">
+        <button id="seat-close">取 消</button>
+        <button id="seat-submit">落 席</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查看占座祝福弹窗 -->
+  <div class="modal" id="seat-view-modal">
+    <div class="modal-box">
+      <h3 id="view-title">席位</h3>
+      <div id="view-body"></div>
+      <div class="modal-actions">
+        <button id="view-close">关 闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 二次确认弹窗 -->
+  <div class="modal" id="confirm-modal">
+    <div class="modal-box">
+      <h3 id="confirm-title">确认</h3>
+      <p id="confirm-text" class="hint"></p>
+      <div class="modal-actions">
+        <button id="confirm-no">取 消</button>
+        <button id="confirm-yes" class="btn-accept">确 认</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="invitations.js"></script>
+  <script src="store.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

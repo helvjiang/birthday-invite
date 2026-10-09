@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>主人后台 · 生辰邀函</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="header"><h1>主人后台</h1><div class="sub">谁 来 · 谁 坐 · 谁 赠</div></div>
+
+    <div class="card" id="login">
+      <p class="welcome">请输入后台密码</p>
+      <div class="name-row">
+        <input id="pwd" class="name-input" type="password" placeholder="密码" />
+        <button id="pwd-go" class="btn-go">进</button>
+      </div>
+      <p class="hint" id="login-err"></p>
+    </div>
+
+    <div id="dash" style="display:none">
+      <div class="card" id="overview"></div>
+      <div class="card">
+        <div class="roster-title">席位明细</div>
+        <div id="seat-detail"></div>
+      </div>
+      <div class="card">
+        <div class="roster-title">赠礼明细</div>
+        <div id="gift-detail"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="store.js"></script>
+  <script>
+    const C = window.CONFIG, S = window.Store;
+    function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+    document.getElementById("pwd-go").onclick = async () => {
+      if (document.getElementById("pwd").value !== C.ADMIN_PASSWORD) {
+        document.getElementById("login-err").textContent = "密码不对，再试试。";
+        return;
+      }
+      document.getElementById("login").style.display = "none";
+      document.getElementById("dash").style.display = "block";
+      await S.init();
+      const d = await S.adminSummary();
+      const inv = await (C.DEMO ? Promise.resolve(null) : S.getInvitationsAll ? S.getInvitationsAll() : Promise.resolve(null));
+      const accepted = d.guests.filter(g => g.status === "accepted");
+      const rejected = d.guests.filter(g => g.status === "rejected");
+      const taken = d.seats.filter(s => s.occupied_by);
+      const giftTotal = d.gifts.length;
+      document.getElementById("overview").innerHTML =
+        `<div class="roster-title">概览</div>` +
+        `<div class="roster-item">受邀 ${d.guests.length}</div>` +
+        `<div class="roster-item">接受 ${accepted.length}</div>` +
+        `<div class="roster-item">婉拒 ${rejected.length}</div>` +
+        `<div class="roster-item">落席 ${taken.length}/${C.SEAT_COUNT}</div>` +
+        `<div class="roster-item">赠礼 ${giftTotal} 件</div>`;
+
+      document.getElementById("seat-detail").innerHTML = taken.length ? taken
+        .sort((a,b)=>a.seat_id-b.seat_id).map(s =>
+          `<div class="wall-card" style="margin:8px 0;padding:8px;border:1px solid rgba(201,168,106,.4);border-radius:10px">
+            <div><b>第${s.seat_id}席</b> · ${esc(s.occupied_by)}
+              ${s.photo_visibility==="private" ? ' <span style="color:var(--red)">［私密照片］</span>' : ""}</div>
+            ${s.photo_url ? `<img src="${s.photo_url}" style="max-width:120px;max-height:120px;border-radius:8px;margin:6px 0"/>` : ""}
+            <div style="font-size:14px;color:#5a5040">${esc(s.message)||"（无题字）"}</div>
+          </div>`).join("") : '<p class="hint">尚无落席</p>';
+
+      const byName = {};
+      d.gifts.forEach(g => {
+        const meta = C.GIFTS.find(x=>x.key===g.gift_type) || {emoji:"🎁",name:g.gift_type};
+        byName[g.from_name] = byName[g.from_name] || {};
+        byName[g.from_name][g.gift_type] = byName[g.from_name][g.gift_type] || {emoji:meta.emoji,name:meta.name,n:0};
+        byName[g.from_name][g.gift_type].n += (g.qty||1);
+      });
+      const names = Object.keys(byName);
+      document.getElementById("gift-detail").innerHTML = names.length ? names.map(nm =>
+        `<div class="wall-card" style="margin:8px 0;padding:8px;border:1px solid rgba(201,168,106,.4);border-radius:10px">
+          <div class="wall-name">${esc(nm)} 赠</div>
+          <div class="wall-items">${Object.values(byName[nm]).map(it=>`<span class="wall-item">${it.emoji}×${it.n}</span>`).join("")}</div>
+        </div>`).join("") : '<p class="hint">尚无赠礼</p>';
+    };
+  </script>
+</body>
+</html>
