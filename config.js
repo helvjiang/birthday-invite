@@ -43,7 +43,7 @@ window.CONFIG = {
     { key:"pansy",             img:"flower/pansy.png",             name:"三色堇" },
     { key:"peach",             img:"flower/peach.png",             name:"桃花" },
     { key:"pear",              img:"flower/pear.png",              name:"梨花" },
-    { key:"peony",             img:"flower/peony.png",             name:"牡丹" },
+    { key:"peony",             img:"flower/peony.png",             name:"芍药" },
     { key:"purpleloosestrife", img:"flower/purpleloosestrife.png", name:"千屈菜" },
     { key:"rainbow",           img:"flower/rainbow.png",           name:"彩虹花" },
     { key:"redbud",            img:"flower/redbud.png",            name:"紫荆" },

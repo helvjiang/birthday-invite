@@ -396,7 +396,7 @@
     if (/micromessenger/i.test(navigator.userAgent)) {
       document.body.classList.add("wx");
       const wx = $("#wx-tip");
-      if (wx) { wx.style.display = "block"; setTimeout(() => { wx.style.opacity = "0"; }, 6000); setTimeout(() => document.body.classList.remove("wx"), 7000); }
+      if (wx) { wx.style.display = "block"; setTimeout(() => { wx.style.opacity = "0"; }, 6000); setTimeout(() => { wx.style.display = "none"; document.body.classList.remove("wx"); }, 7000); }
     }
     document.querySelectorAll(".nav-btn").forEach((b) => b.onclick = () => showView(b.dataset.view));
     $("#seat-close").onclick = closeSeatModal;
